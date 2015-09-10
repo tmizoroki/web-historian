@@ -19,7 +19,7 @@ exports.handleRequest = function (req, res) {
   // Setup route for GET request
   if(req.method === "GET") {
     // If GET request for "/"
-    if( urlPath === "/" || urlPath === "/styles.css") {
+    if(urlPath === "/" || urlPath === "/styles.css") {
       fs.readFile(clientHtml, function read(err, html) {
         if (err) {
           throw err;
@@ -32,17 +32,19 @@ exports.handleRequest = function (req, res) {
     }
 
   } else if (req.method === 'POST') {
-     var body = '';
-        req.on('data', function (data) {
-          body += data;
-        });
-        req.on('end', function() {
-          var address = qs.parse(body).url;
-          return archive.isUrlInList(address, function(flag) {
-            console.log('flag: ' + flag);
-            return flag;
-          });
-        });
+    var body = '';
+    req.on('data', function (data) {
+      body += data;
+    });
+    req.on('end', function() {
+      var address = qs.parse(body).url;
+      var isInList = archive.isUrlInList(address, function(flag) {
+        console.log('FLAG: ', flag);
+        return flag;
+      });
+      // 
+      isInList ? archive.isUrlArchived() : archive.addUrlToList(address);
+    });
     console.log("url: " + req.url);
     console.log('querystring: ', qs.parse(req));
   } else if ("something") {

@@ -26,32 +26,51 @@ exports.initialize = function(pathsObj) {
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function() {
+  // iterate over the array of URLS
+
+    // call callback on each URL
+
 };
 
-exports.isUrlInList = function(address) {
-  // read
-  var isInList = false;
-  fs.readFile(exports.paths.list, function(err, data) {
-    //console.log(err);
+exports.isUrlInList = function(address, callback) {
+
+  var isInList = function(err, data) {
     if (err) {
       throw err;
     }
-
     if (data.length > 0) {
       // parse data
       var parsedData = JSON.parse(data);
       // data.indexOf (address)
-      isInList = parsedData.indexOf(address) > -1;
-      console.log("In list?? " + isInList);
-    } else {
-      throw err;
-    } 
-  });
-  console.log('isinlist outside: ', isInList);
-  return isInList;
+      callback(parsedData.indexOf(address) > -1);
+    }
+  }
+
+  fs.readFile(exports.paths.list, 'utf-8', isInList);
 };
 
-exports.addUrlToList = function() {
+exports.addUrlToList = function(address) {
+  //read the file
+  fs.readFile(exports.paths.list, 'utf-8',function(err, data) {
+    if (err) {
+      throw err;
+    }
+    // If the .txt file is empty, the create a JSON array
+    if (data.length === 0) {
+      data = JSON.stringify([]);
+    }
+
+    var parseData = JSON.parse(data);
+    parseData.push(address);
+
+    var stringifiedData = JSON.stringify(parseData);
+
+    fs.writeFile(exports.paths.list, stringifiedData, function(err) {
+      if (err) {
+        throw err;
+      }
+    })
+  });
 };
 
 exports.isUrlArchived = function() {
