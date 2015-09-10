@@ -28,7 +28,27 @@ exports.initialize = function(pathsObj) {
 exports.readListOfUrls = function() {
 };
 
-exports.isUrlInList = function() {
+exports.isUrlInList = function(address) {
+  // read
+  var isInList = false;
+  fs.readFile(exports.paths.list, function(err, data) {
+    //console.log(err);
+    if (err) {
+      throw err;
+    }
+
+    if (data.length > 0) {
+      // parse data
+      var parsedData = JSON.parse(data);
+      // data.indexOf (address)
+      isInList = parsedData.indexOf(address) > -1;
+      console.log("In list?? " + isInList);
+    } else {
+      throw err;
+    } 
+  });
+  console.log('isinlist outside: ', isInList);
+  return isInList;
 };
 
 exports.addUrlToList = function() {
