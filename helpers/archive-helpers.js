@@ -25,10 +25,14 @@ exports.initialize = function(pathsObj) {
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function() {
-  // iterate over the array of URLS
-
-    // call callback on each URL
+exports.readListOfUrls = function(callback) {
+  fs.readFile(exports.paths.list, 'utf-8', function(err, data) {
+    if(err) {
+      throw err;
+    }
+    data = data.split('\n');
+    callback(data);
+  });
 
 };
 
@@ -40,7 +44,7 @@ exports.isUrlInList = function(address, callback) {
     }
     if (data.length > 0) {
       // parse data
-      var parsedData = JSON.parse(data);
+      var parsedData = data.split('\n');
       // data.indexOf (address)
       callback(parsedData.indexOf(address) > -1);
     }
@@ -49,27 +53,13 @@ exports.isUrlInList = function(address, callback) {
   fs.readFile(exports.paths.list, 'utf-8', isInList);
 };
 
-exports.addUrlToList = function(address) {
-  //read the file
-  fs.readFile(exports.paths.list, 'utf-8',function(err, data) {
-    if (err) {
+exports.addUrlToList = function(address, callback) {
+  address = address + "\n";
+  fs.appendFile(exports.paths.list, address, function (err) {
+    if(err) {
       throw err;
+      console.log('The "data to append" was appended to file!');
     }
-    // If the .txt file is empty, the create a JSON array
-    if (data.length === 0) {
-      data = JSON.stringify([]);
-    }
-
-    var parseData = JSON.parse(data);
-    parseData.push(address);
-
-    var stringifiedData = JSON.stringify(parseData);
-
-    fs.writeFile(exports.paths.list, stringifiedData, function(err) {
-      if (err) {
-        throw err;
-      }
-    })
   });
 };
 
