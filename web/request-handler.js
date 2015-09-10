@@ -16,7 +16,7 @@ exports.handleRequest = function (req, res) {
 
   
 
-  // Setup route for GET request
+  // GET Route
   if(req.method === "GET") {
     // If GET request for "/"
     if(urlPath === "/" || urlPath === "/styles.css") {
@@ -30,23 +30,25 @@ exports.handleRequest = function (req, res) {
         }
       });
     }
-
+    
+  // POST Route
   } else if (req.method === 'POST') {
     var body = '';
     req.on('data', function (data) {
       body += data;
     });
+
+
     req.on('end', function() {
       var address = qs.parse(body).url;
+
       var isInList = archive.isUrlInList(address, function(flag) {
-        console.log('FLAG: ', flag);
         return flag;
       });
-      // 
+
       isInList ? archive.isUrlArchived() : archive.addUrlToList(address);
+
     });
-    console.log("url: " + req.url);
-    console.log('querystring: ', qs.parse(req));
   } else if ("something") {
     res.end(archive.paths.list);
   }

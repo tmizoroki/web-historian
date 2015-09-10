@@ -43,9 +43,7 @@ exports.isUrlInList = function(address, callback) {
       throw err;
     }
     if (data.length > 0) {
-      // parse data
       var parsedData = data.split('\n');
-      // data.indexOf (address)
       callback(parsedData.indexOf(address) > -1);
     }
   }
@@ -54,16 +52,36 @@ exports.isUrlInList = function(address, callback) {
 };
 
 exports.addUrlToList = function(address, callback) {
+  // invoke isUrlOnList(adress, function(boolean) {
+    // if(boolean )
+
+  })
   address = address + "\n";
+
   fs.appendFile(exports.paths.list, address, function (err) {
     if(err) {
       throw err;
-      console.log('The "data to append" was appended to file!');
     }
+    console.log('The "data to append" was appended to file!');
+
   });
+    
+
 };
 
-exports.isUrlArchived = function() {
+// archive.addUrlToList('someurl.com');
+// archive.isUrlInList('someurl'); // --> false?
+
+exports.isUrlArchived = function(address, callback) {
+  var flag = false;
+  var isArchived = function(err) {
+    if (!err) {
+      flag = true;
+    }
+    console.log(flag, address);
+    callback(flag);
+  }
+  fs.access(exports.paths.archivedSites + "/" + address, fs.R_OK, isArchived);
 };
 
 exports.downloadUrls = function() {
