@@ -45,6 +45,8 @@ exports.isUrlInList = function(address, callback) {
     if (data.length > 0) {
       var parsedData = data.split('\n');
       callback(parsedData.indexOf(address) > -1);
+    } else {
+      callback(false);
     }
   }
 
@@ -52,18 +54,17 @@ exports.isUrlInList = function(address, callback) {
 };
 
 exports.addUrlToList = function(address, callback) {
-  // invoke isUrlOnList(adress, function(boolean) {
-    // if(boolean )
-
-  })
   address = address + "\n";
 
+  console.log('address: ', address);
   fs.appendFile(exports.paths.list, address, function (err) {
     if(err) {
       throw err;
     }
     console.log('The "data to append" was appended to file!');
-
+    if(callback) {
+      callback();
+    }
   });
     
 
@@ -84,5 +85,23 @@ exports.isUrlArchived = function(address, callback) {
   fs.access(exports.paths.archivedSites + "/" + address, fs.R_OK, isArchived);
 };
 
-exports.downloadUrls = function() {
+exports.downloadUrls = function(array) {
+  var archiveSites = fs.readdir(exports.paths.archivedSites);
+
+  //iterate over array and check to see if it is in fs.readDir(archive.paths.archivedSits\es)
+  _.each(array, function(item) {
+    if(!_.contains(archiveSites, item)) {
+      console.log('item: ', item);
+      console.log('archivedSites: ', exports.paths.archivedSites + "/" + item);
+      var fd = fs.open(exports.paths.archivedSites + "/" + item, "w");
+      //fs.write(fd);
+      //fs.close(fd);
+    }
+  });
+
+  // if it's not
+
+    ;
+
+
 };
