@@ -2,23 +2,26 @@ var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var url = require('url');
 var qs = require('querystring');
+var fetch = require('../workers/htmlfetcher.js');
 
 // Requiring fs modeule to serve up Index.html
 var fs = require('fs');
-var path = require('path');
 
 exports.handleRequest = function (req, res) {
   // console.log(req);
   // Parse the incoming url
   var urlPath = url.parse(req.url).pathname;
   // Creates path to index.html
-  var clientHtml = path.join(process.cwd(), 'web', 'public', 'index.html');
+  var clientHtml = path.join(process.cwd(), 'public', 'index.html');
+  var loadingHtml = path.join(process.cwd(), 'public', 'loading.html');
   var fixturePath = archive.paths.archivedSites + urlPath;
 
   // GET Route
   if(req.method === "GET") {
     // If GET request for "/"
     if(urlPath === "/" || urlPath === "/styles.css") { // Within GET route, serve Index.html
+    console.log('inside GET:');
+      console.log(clientHtml);
       fs.readFile(clientHtml, function read(err, html) {
         if (err) {
           throw err;
@@ -66,15 +69,61 @@ exports.handleRequest = function (req, res) {
 
         // Check if URL is in List
         archive.isUrlInList(address, function(isInList) {
-          isInList ? archive.isUrlArchived() : archive.addUrlToList(address, function() {
-            res.writeHead(302, {"Content-Type": "text/html"});
-            res.end();
-          });
+          if (isInList) { // If we have the address in the list .txt
+            // If we have the page archived
+            archive.isUrlArchived(address, function(isInArchive) {
+              if(isInArchive) {
+                // Make sure the path is there
+                var sitePath = archive.paths.archivedSites + "/" + address;
+                // Serve Archived Page
+                fs.readFile(sitePath, function read(err, html) {
+                  if (err) {
+                    throw err;
+                  } else {
+                    res.writeHead(302, {"Location": "http://" + "127.0.0.1:8080/" + address});
+                    res.write(html, 'binary');
+                    res.end();
+                  }
+                });
+              } else { // NOTE: HANDLE IF NOT ARCHIVED
+                console.log("right before fetch")
+                fetch.fetch(function(){
+                  var sitePath = archive.paths.archivedSites + "/" + address;
+                  // Serve Archived Page
+                  fs.readFile(sitePath, function read(err, html) {
+                    console.log("inside read file")
+                    if (err) {
+                      throw err;
+                    } else {
+                      res.writeHead(302, {"Content-Type": "text/html"});
+                      res.write(html, 'binary');
+                      res.end();
+                    }
+                  });
+                });
+              }
+            });
 
+            
+
+          } else { // If the URL is not in the list, add it to list, serve user loading page
+            //Successfully posting url to list
+            archive.addUrlToList(address, function() {
+              // Serve Loading Page
+              fetch.fetch();
+              fs.readFile(loadingHtml, function read(err, html) {
+                if (err) {
+                  throw err;
+                } else {
+                  res.writeHead(302, {"Content-Type": "text/html"});
+                  res.write(html, 'binary');
+                  res.end();
+                }
+              });
+            });
+          }
         });
       });
     }
-
   } 
-
 };
